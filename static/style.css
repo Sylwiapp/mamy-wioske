@@ -471,7 +471,12 @@ h1 {
 }
 
 .chip.on,
-.mini.on,
+.mini.on {
+  background: var(--mint);
+  color: var(--green);
+  border-color: #9ec9a8;
+}
+
 .primary {
   background: var(--green);
   color: #fff;
@@ -772,6 +777,7 @@ textarea {
 }
 
 .checks label {
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -792,10 +798,11 @@ textarea {
 }
 
 .checks input {
-  width: 1rem;
-  height: 1rem;
-  min-height: 0;
-  accent-color: var(--green);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .bottom {
@@ -1215,16 +1222,6 @@ body.gate-on .bottom {
   padding-top: 16px;
 }
 
-.gate-demo {
-  text-align: center;
-  margin: 10px 0 0;
-}
-
-.gate-demo span {
-  font-weight: 700;
-  color: var(--green);
-}
-
 .districts {
   display: grid;
   gap: 8px;
@@ -1401,9 +1398,16 @@ button:focus-visible,
   }
 
   .chip.on:hover,
+  .mini.on:hover {
+    background: #dceee0;
+    border-color: var(--green);
+    color: var(--green);
+    transform: translateY(-1px);
+  }
+
   .primary:hover {
-    background: #245a3f;
-    border-color: #245a3f;
+    background: #3d8a60;
+    border-color: #3d8a60;
     transform: translateY(-1px);
   }
 

@@ -651,7 +651,7 @@ DEFAULT_PROFILE = {
     "availability": "spacer",
     "window": "16:00–18:00",
     "quiet": False,
-    "onboarded": False,
+    "onboarded": True,
     "email": "",
     "verified": False,
     "about": "Szukam spokojnej wioski: ktoś na wózek i pogawędkę, bez presji.",

@@ -204,12 +204,6 @@ function applyBrowse(districtId, areaId) {
   state.zoom = node.zoom || (nextArea ? 15 : 14);
 }
 
-function shouldShowGate() {
-  const params = new URLSearchParams(location.search);
-  if (params.has("demo") || params.has("start")) return true;
-  return !state.profile?.onboarded;
-}
-
 async function setBrowse(districtId, areaId) {
   applyBrowse(districtId, areaId);
   renderChrome();
@@ -1252,10 +1246,6 @@ document.getElementById("gate-next").addEventListener("click", async () => {
   }
   await finishGate();
 });
-document.getElementById("replay-demo").addEventListener("click", () => {
-  showGate(false);
-});
-
 document.getElementById("profile-form").addEventListener("submit", async (ev) => {
   ev.preventDefault();
   const payload = collectProfile({ onboarded: true });
@@ -1355,9 +1345,8 @@ document.getElementById("create-swap").addEventListener("submit", async (ev) => 
 renderChrome();
 Promise.all([loadProfile(), loadTrust(), loadInbox()]).then(() => {
   fillProfileForm();
+  hideGate();
   renderChrome();
   renderLists();
-  const params = new URLSearchParams(location.search);
-  if (shouldShowGate()) showGate(params.has("demo") || params.has("start") || !state.profile?.onboarded);
   loadVillage();
 });
