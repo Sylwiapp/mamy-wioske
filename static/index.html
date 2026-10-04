@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#1F7A4C" />
+    <title>mamy wioskę</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="/static/img/app-icon.jpg" type="image/jpeg" />
+    <link rel="apple-touch-icon" href="/static/img/app-icon.jpg" />
+    <link rel="stylesheet" href="/static/style.css?v=55" />
+  </head>
+  <body data-tab="poznaj">
+    <div class="phone">
+      <section class="gate" id="gate" hidden>
+        <div class="gate-top">
+          <img class="gate-logo" src="/static/img/app-icon.jpg" alt="" width="56" height="56" />
+          <p class="gate-count" id="gate-count">1 / 6</p>
+        </div>
+        <div class="gate-dots" id="gate-dots" aria-hidden="true"></div>
+
+        <div class="gate-step" data-step="0">
+          <img class="hero" src="/static/img/hero.svg" alt="" />
+          <h2>Witaj w wiosce</h2>
+          <p class="lede">
+            mamy wioskę to lokalna społeczność rodziców. Najpierw opowiesz o sobie.
+          </p>
+        </div>
+
+        <div class="gate-step" data-step="1" hidden>
+          <h2>Potwierdź, że to Ty</h2>
+          <p class="lede">Krótka weryfikacja maila, żeby wioska nie zapełniła się botami. Nic nie wysyłamy naprawdę — to ekran demonstracyjny.</p>
+          <label>E-mail <input id="gate-email" type="email" inputmode="email" autocomplete="email" placeholder="np. sylwia@wioska.pl" /></label>
+        </div>
+
+        <div class="gate-step" data-step="2" hidden>
+          <h2>Kod z wiadomości</h2>
+          <p class="lede">Wpisz kod, który „przyszedł” na <strong id="gate-code-mail">Twój e-mail</strong>.</p>
+          <label>Kod z maila <input id="gate-code" inputmode="numeric" maxlength="6" placeholder="0000" /></label>
+          <p class="hint">Na prezentację wpisz dowolne 4 cyfry, np. 0000.</p>
+          <button class="ghost mini" id="gate-resend" type="button">Wyślij kod ponownie</button>
+          <p class="hint" id="gate-resent" hidden>Kod wysłany ponownie. Nadal możesz wpisać 0000.</p>
+        </div>
+
+        <div class="gate-step" data-step="3" hidden>
+          <h2>O Tobie</h2>
+          <label>Imię <input id="gate-name" required placeholder="Np. Sylwia" /></label>
+          <label>O sobie <textarea id="gate-about" rows="4" placeholder="Czego szukasz w okolicy, bez presji."></textarea></label>
+        </div>
+
+        <div class="gate-step" data-step="4" hidden>
+          <h2>Dzieci w wiosce</h2>
+          <div id="gate-kids"></div>
+          <button class="mini" id="gate-add-kid" type="button">Dodaj dziecko</button>
+        </div>
+
+        <div class="gate-step" data-step="5" hidden>
+          <h2>Czego szukasz?</h2>
+          <div class="checks" id="gate-seeking"></div>
+        </div>
+
+        <div class="gate-nav">
+          <button type="button" class="ghost" id="gate-back">Wstecz</button>
+          <button type="button" class="primary" id="gate-next">Dalej</button>
+        </div>
+        <p class="hint gate-demo">Do prezentacji: <span>?demo=1</span> albo przycisk w profilu.</p>
+      </section>
+      <header class="appbar">
+        <div class="brand">
+          <span class="logo" aria-hidden="true">
+            <img src="/static/img/app-icon.jpg" alt="" width="44" height="44" />
+          </span>
+          <div>
+            <p class="hello" id="hello">Cześć</p>
+            <h1>mamy wioskę</h1>
+          </div>
+        </div>
+        <p class="place" id="place" hidden>W okolicy</p>
+        <div class="app-actions">
+          <button type="button" class="icon-btn" id="btn-notices" aria-label="Powiadomienia">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 9a6 6 0 0 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9Z" />
+              <path d="M10 20a2 2 0 0 0 4 0" />
+            </svg>
+            <em id="badge-notices" hidden>0</em>
+          </button>
+          <button type="button" class="icon-btn" id="btn-profile" aria-label="Twój profil">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="3" />
+              <path d="M5.5 19c1-3.2 3.2-5 6.5-5s5.5 1.8 6.5 5" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="feed">
+        <section id="panel-poznaj">
+          <header class="screen-head">
+            <h2 class="screen-title">Poznaj wioskę</h2>
+          </header>
+          <div class="radius-wrap">
+            <div class="area-map-wrap">
+              <div class="area-map" id="area-map">
+                <img src="/static/img/area-map.svg?v=55" alt="" />
+                <div class="area-ring" id="area-ring" style="--ring-t: 0">
+                  <p class="area-count" aria-live="polite">
+                    <strong id="area-count-num">0</strong>
+                    <span id="area-count-label">mam</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="radius-tools">
+              <button type="button" class="radius-step" id="radius-minus" aria-label="Zmniejsz obszar">−</button>
+              <div class="radius-slider">
+                <input class="distance-range" id="radius-range" type="range" min="0" max="4" step="1" value="0" />
+                <div class="distance-ticks" id="distance-ticks" aria-hidden="true">
+                  <span>500 m</span>
+                  <span>1 km</span>
+                  <span>3 km</span>
+                  <span>5 km</span>
+                  <span>10 km</span>
+                </div>
+              </div>
+              <button type="button" class="radius-step" id="radius-plus" aria-label="Powiększ obszar">+</button>
+            </div>
+          </div>
+          <div class="need-block">
+            <p class="create-title">Marzenia i potrzeby</p>
+            <div class="checks" id="need-filters"></div>
+          </div>
+          <div class="need-block">
+            <p class="create-title">Wiek dzieci</p>
+            <div class="filters" id="age-filters"></div>
+            <div class="filters" id="star-filters"></div>
+          </div>
+          <h3 class="block-title">Kto jest w okolicy</h3>
+          <p class="empty" id="empty-parents" hidden>
+            <img src="/static/img/empty.svg" alt="" width="220" height="120" />
+            <span id="empty-parents-text">Nikogo w tym promieniu. Powiększ obszar.</span>
+          </p>
+          <ul class="cards" id="list-parents"></ul>
+        </section>
+
+        <section id="panel-miejsca" hidden>
+          <header class="screen-head">
+            <h2 class="screen-title">Miejsca i usługi</h2>
+          </header>
+          <div class="filters" id="place-filters"></div>
+          <p class="empty" id="empty-places" hidden>Brak miejsc w tym promieniu.</p>
+          <ul class="cards" id="list-places"></ul>
+        </section>
+
+        <section id="panel-dzieje" hidden>
+          <header class="screen-head">
+            <h2 class="screen-title">Wydarzenia</h2>
+          </header>
+          <div class="filter-block">
+            <p class="create-title">Kiedy</p>
+            <div class="filters" id="horizon-filters"></div>
+          </div>
+          <div class="filter-block">
+            <p class="create-title">Rodzaj</p>
+            <div class="filters" id="happen-filters"></div>
+          </div>
+          <div class="filter-block">
+            <p class="create-title">Wstęp</p>
+            <div class="filters" id="price-filters"></div>
+          </div>
+          <p class="empty" id="empty-happenings" hidden>
+            <img src="/static/img/empty.svg" alt="" width="220" height="120" />
+            Pusto w okolicy. Dodaj pierwsze hasło.
+          </p>
+          <ul class="cards" id="list-happenings"></ul>
+          <form class="create" id="create-event">
+            <p class="create-title">Nie ma tego na liście? Dodaj hasło</p>
+            <input name="title" required placeholder="Np. spacer o 17:00 przy placu zabaw" />
+            <input name="when" placeholder="Kiedy — dziś, wtorek, w maju…" />
+            <input name="place" placeholder="Gdzie" />
+            <button type="submit" class="primary">Opublikuj</button>
+          </form>
+        </section>
+
+        <section id="panel-wymiana" hidden>
+          <img class="hero slim" src="/static/img/photos/hero-swap.jpg?v=19" alt="" width="720" height="160" />
+          <header class="screen-head">
+            <h2 class="screen-title">Wymiana</h2>
+          </header>
+          <div class="filters" id="swap-filters"></div>
+          <p class="empty" id="empty-swaps" hidden>Brak ogłoszeń w okolicy.</p>
+          <ul class="cards" id="list-swaps"></ul>
+          <form class="create" id="create-swap">
+            <p class="create-title">Masz ogłoszenie gdzie indziej? Wklej</p>
+            <input name="title" required placeholder="Co oddajesz albo czego szukasz" />
+            <select name="platform">
+              <option value="osiedle">Osiedle</option>
+              <option value="vinted">Vinted</option>
+              <option value="olx">OLX</option>
+              <option value="facebook">Grupa FB</option>
+            </select>
+            <input name="url" placeholder="Link https://…" />
+            <input name="note" placeholder="Krótka notatka" />
+            <button type="submit" class="primary">Dodaj</button>
+          </form>
+        </section>
+
+        <section id="panel-inbox" hidden>
+          <header class="screen-head">
+            <h2 class="screen-title">Wiadomości</h2>
+          </header>
+          <p class="empty" id="empty-inbox" hidden>Jeszcze pusto — napisz do kogoś w Poznaj.</p>
+          <ul class="cards" id="list-inbox"></ul>
+        </section>
+
+        <section id="panel-profil" hidden>
+          <header class="screen-head">
+            <h2 class="screen-title">Twój profil</h2>
+          </header>
+          <form class="create profile-form" id="profile-form">
+            <label>Imię <input name="name" required /></label>
+            <p class="verified" id="profile-verified" hidden></p>
+            <label>O sobie <textarea name="about" rows="3"></textarea></label>
+            <p class="create-title">Dzieci w wiosce</p>
+            <div id="kids-list"></div>
+            <button class="mini" id="add-kid" type="button">Dodaj dziecko</button>
+            <p class="create-title">Czego szukam w wiosce</p>
+            <div class="checks" id="seeking-checks"></div>
+            <button type="submit" class="primary">Zapisz profil</button>
+            <button type="button" class="ghost" id="replay-demo">Pokaż powitanie od początku</button>
+            <p class="hint">Na prezentację: otwórz stronę z <code>?demo=1</code>.</p>
+            <p class="hint" id="profile-saved" hidden>Zapisane.</p>
+          </form>
+        </section>
+      </main>
+
+      <nav class="bottom" aria-label="Główne zakładki">
+        <button class="tab on" data-tab="poznaj" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="9" cy="8" r="2.4" />
+            <circle cx="16" cy="9" r="2.1" />
+            <path d="M4.5 18c.6-2.6 2.6-4 4.5-4s3.9 1.4 4.5 4" />
+            <path d="M13 18c.4-2 1.8-3.2 3.2-3.2 1.5 0 2.8 1.1 3.3 3.2" />
+          </svg>
+          Poznaj
+          <em id="count-parents">0</em>
+        </button>
+        <button class="tab" data-tab="dzieje" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 4v3M17 4v3M5 9h14M6 7h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" />
+            <path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01" />
+          </svg>
+          Wydarzenia
+          <em id="count-happenings">0</em>
+        </button>
+        <button class="tab" data-tab="wymiana" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 7h10l-2.5-2.5M17 17H7l2.5 2.5" />
+            <path d="M17 7v4M7 17v-4" />
+          </svg>
+          Wymiana
+          <em id="count-swaps">0</em>
+        </button>
+        <button class="tab" data-tab="miejsca" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 10h16v9H4Z" />
+            <path d="M6 10V7l6-3 6 3v3" />
+            <path d="M10 19v-5h4v5" />
+          </svg>
+          Miejsca
+          <em id="count-places">0</em>
+        </button>
+        <button class="tab" data-tab="inbox" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 6.5h16v11H4Z" />
+            <path d="M4 7l8 6 8-6" />
+          </svg>
+          Wiadomości
+          <em id="badge-inbox" hidden>0</em>
+        </button>
+      </nav>
+    </div>
+
+    <div class="scrim" id="scrim" hidden></div>
+    <aside class="drawer" id="sheet" hidden></aside>
+
+    <script src="/static/app.js?v=55"></script>
+  </body>
+</html>
