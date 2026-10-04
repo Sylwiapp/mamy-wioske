@@ -460,6 +460,11 @@ def index() -> FileResponse:
     return FileResponse(STATIC / "index.html")
 
 
+@app.get("/qr")
+def qr_slide() -> FileResponse:
+    return FileResponse(STATIC / "qr.html")
+
+
 @app.post("/api/village")
 def village(query: VillageQuery) -> dict:
     origin = me_origin()
