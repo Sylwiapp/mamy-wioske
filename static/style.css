@@ -318,10 +318,57 @@ h1 {
 }
 
 .distance-range {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
-  margin: 4px 0 2px;
-  accent-color: var(--green);
+  height: 22px;
+  margin: 2px 0 4px;
+  background: transparent;
   cursor: pointer;
+}
+
+.distance-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--green) 0 var(--range-p, 25%),
+    #d8e0c4 var(--range-p, 25%) 100%
+  );
+}
+
+.distance-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 6px rgba(56, 102, 65, 0.28);
+}
+
+.distance-range::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #d8e0c4;
+  border: none;
+}
+
+.distance-range::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--green);
+}
+
+.distance-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 1px 6px rgba(56, 102, 65, 0.28);
 }
 
 .distance-ticks {
@@ -329,6 +376,7 @@ h1 {
   justify-content: space-between;
   gap: 4px;
   margin: 0;
+  padding: 0 9px;
   font-size: 0.68rem;
   color: var(--muted);
   font-weight: 650;

@@ -108,6 +108,7 @@ function fillRadiusControl() {
   const i = radiusIndex();
   if (range) {
     range.value = String(i);
+    range.style.setProperty("--range-p", `${(i / Math.max(1, RADIUS_STEPS.length - 1)) * 100}%`);
     range.setAttribute("aria-valuetext", radiusLabel(state.radiusM));
   }
   if (minus) minus.disabled = i <= 0;
