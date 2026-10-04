@@ -1,4 +1,4 @@
-# MAMY Wioskę
+# mamy wioskę
 
 Aplikacja do budowania lokalnej wspólnoty rodziców: kto jest blisko na spacer, co się dzieje w okolicy, czym się wymienić i które miejsca są sprawdzone.
 
@@ -18,7 +18,11 @@ Otwórz http://127.0.0.1:8000.
 
 ## Hosting
 
+Kod: https://github.com/Sylwiapp/mamy-wioske
+
 Aplikacja potrzebuje Pythona (FastAPI + SQLite), więc **GitHub Pages jej nie uruchomi**. Publiczną wersję stawia Render z tego repo: Web Service, start `uvicorn app:app --host 0.0.0.0 --port $PORT`.
+
+Jednym kliknięciem: https://render.com/deploy?repo=https://github.com/Sylwiapp/mamy-wioske
 
 ## Zakładki
 
