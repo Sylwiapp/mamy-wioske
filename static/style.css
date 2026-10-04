@@ -1,15 +1,17 @@
 :root {
-  --green: #2c6b4a;
-  --green-2: #3d8a60;
-  --mint: #e8f3ea;
-  --bg: #f6f1e8;
-  --card: #fffcf7;
-  --ink: #24352c;
-  --muted: #66786e;
-  --line: #e4ddd0;
-  --peach: #f3e2cd;
-  --shadow: 0 10px 28px rgba(36, 53, 44, 0.07);
-  --shadow-hover: 0 18px 40px rgba(36, 53, 44, 0.14);
+  --green: #386641;
+  --green-2: #6a994e;
+  --lime: #a7c957;
+  --mint: #eef4d8;
+  --bg: #f4eedd;
+  --card: #fbf8ef;
+  --ink: #2a3d2e;
+  --muted: #6b7d62;
+  --line: #e3dcc6;
+  --peach: #f2e8cf;
+  --accent: #bc4749;
+  --shadow: 0 10px 28px rgba(56, 102, 65, 0.08);
+  --shadow-hover: 0 18px 40px rgba(56, 102, 65, 0.14);
   --ease: 180ms ease;
   font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
   color: var(--ink);
@@ -27,7 +29,7 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  background: #dfe8d9;
+  background: #e4ebd4;
 }
 
 body {
@@ -40,15 +42,15 @@ body {
   height: 100dvh;
   max-height: 100dvh;
   background:
-    radial-gradient(120% 80% at 100% -10%, #f3e2cd 0%, transparent 46%),
-    radial-gradient(90% 60% at 0% 0%, #e8f3ea 0%, transparent 42%),
+    radial-gradient(120% 80% at 100% -10%, var(--peach) 0%, transparent 46%),
+    radial-gradient(90% 60% at 0% 0%, var(--mint) 0%, transparent 42%),
     var(--bg);
   display: flex;
   flex-direction: column;
   padding: env(safe-area-inset-top) 0 calc(78px + env(safe-area-inset-bottom));
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 0 12px rgba(44, 107, 74, 0.05);
+  box-shadow: 0 0 0 12px rgba(56, 102, 65, 0.06);
 }
 
 .appbar {
@@ -108,7 +110,7 @@ body {
   height: 18px;
   padding: 0 5px;
   border-radius: 99px;
-  background: #c47b4a;
+  background: var(--accent);
   color: #fff;
   font: 700 0.68rem/18px "Source Sans 3", sans-serif;
   font-style: normal;
@@ -137,13 +139,13 @@ body {
 .logo {
   width: 44px;
   height: 44px;
-  border-radius: 14px;
+  border-radius: 50%;
   color: var(--green);
   display: grid;
   place-items: center;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(44, 107, 74, 0.18);
+  background: var(--green-2);
 }
 
 .logo img,
@@ -152,13 +154,6 @@ body {
   width: 44px;
   height: 44px;
   object-fit: cover;
-}
-
-.hello {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 600;
 }
 
 h1 {
@@ -180,7 +175,7 @@ h1 {
 .map-host {
   height: 228px;
   width: 100%;
-  background: #dce8dc;
+  background: var(--mint);
 }
 
 .radius-wrap {
@@ -206,7 +201,7 @@ h1 {
   width: 100%;
   border-radius: 16px;
   overflow: hidden;
-  background: #dce8dc;
+  background: var(--mint);
   border: 1px solid var(--line);
 }
 
@@ -218,7 +213,7 @@ h1 {
 }
 
 .area-ring {
-  --ring-t: 0;
+  --ring-t: 0.25;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -226,9 +221,9 @@ h1 {
   height: calc(58px + var(--ring-t) * 108px);
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  border: 2px solid rgba(44, 107, 74, 0.72);
-  background: rgba(232, 243, 234, 0.72);
-  box-shadow: 0 0 0 10px rgba(44, 107, 74, 0.08);
+  border: 2px solid rgba(56, 102, 65, 0.72);
+  background: rgba(238, 244, 216, 0.72);
+  box-shadow: 0 0 0 10px rgba(56, 102, 65, 0.08);
   display: grid;
   place-items: center;
   pointer-events: none;
@@ -398,11 +393,21 @@ h1 {
 
 .screen-head {
   text-align: center;
-  margin: 2px 0 16px;
+  margin: 2px -6px 14px;
 }
 
 .screen-head .screen-title {
   margin: 0 0 6px;
+}
+
+.screen-title-long {
+  font-size: 1.22rem;
+  line-height: 1.2;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+  max-width: none;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .screen-head .lede {
@@ -410,11 +415,14 @@ h1 {
   max-width: 36ch;
 }
 
-.block-title {
-  margin: 18px 0 8px;
-  font-size: 1.02rem;
+.block-title,
+.list-heading {
+  margin: 22px 0 12px;
+  font-size: 1.28rem;
   font-weight: 700;
+  letter-spacing: -0.03em;
   text-align: center;
+  color: var(--ink);
 }
 
 .lede {
@@ -474,7 +482,7 @@ h1 {
 .mini.on {
   background: var(--mint);
   color: var(--green);
-  border-color: #9ec9a8;
+  border-color: var(--lime);
 }
 
 .primary {
@@ -485,6 +493,19 @@ h1 {
 
 .filters {
   margin: 8px 0 12px;
+}
+
+#place-filters {
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+#place-filters .mini {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 8px 6px;
+  font-size: 0.78rem;
+  text-align: center;
 }
 
 .mini {
@@ -609,9 +630,10 @@ h1 {
   box-shadow: 0 0 0 2px #fff;
 }
 
-.village-badge .tipi {
+.village-badge .heart {
   width: 12px;
   height: 12px;
+  display: block;
 }
 
 .village-mark {
@@ -635,12 +657,24 @@ h1 {
   color: var(--green);
 }
 
-.village-mark .tipi,
-.village-chip .tipi,
-.village-sheet .tipi {
+.village-mark .heart,
+.village-sheet .heart {
   width: 18px;
   height: 18px;
   display: block;
+}
+
+.heart path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+}
+
+.village-mark.on .heart path,
+.village-badge .heart path,
+.village-sheet.on .heart path {
+  fill: currentColor;
 }
 
 .village-chip,
@@ -861,7 +895,7 @@ textarea {
 }
 
 .tab em#badge-inbox {
-  background: #c47b4a;
+  background: var(--accent);
   color: #fff;
   border-radius: 99px;
   min-width: 16px;
@@ -954,7 +988,7 @@ textarea {
 
 .card.fresh {
   border-color: var(--green);
-  background: #f4faf5;
+  background: var(--mint);
 }
 
 .card.notice {
@@ -966,7 +1000,7 @@ textarea {
 }
 
 .event-card.sponsor .event-photo em {
-  background: #c47b4a;
+  background: var(--accent);
 }
 
 .event-card.joined {
@@ -1152,7 +1186,7 @@ body.gate-on .bottom {
   inset: 0;
   z-index: 7;
   background:
-    radial-gradient(120% 80% at 100% -10%, #f3e2cd 0%, transparent 46%),
+    radial-gradient(120% 80% at 100% -10%, var(--peach) 0%, transparent 46%),
     var(--bg);
   padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
   display: flex;
@@ -1170,9 +1204,9 @@ body.gate-on .bottom {
 .gate-logo {
   width: 52px;
   height: 52px;
-  border-radius: 16px;
+  border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 4px 12px rgba(44, 107, 74, 0.18);
+  background: var(--green-2);
 }
 
 .gate-count {
@@ -1370,13 +1404,13 @@ button:focus-visible,
 @media (hover: hover) and (pointer: fine) {
   .card:hover {
     transform: translateY(-3px);
-    border-color: #c9dccb;
+    border-color: #c9dba8;
     box-shadow: var(--shadow-hover);
   }
 
   .person-item:hover {
     transform: translateY(-3px);
-    border-color: #c9dccb;
+    border-color: #c9dba8;
     box-shadow: var(--shadow-hover);
   }
 
@@ -1399,15 +1433,15 @@ button:focus-visible,
 
   .chip.on:hover,
   .mini.on:hover {
-    background: #dceee0;
+    background: #e5efcc;
     border-color: var(--green);
     color: var(--green);
     transform: translateY(-1px);
   }
 
   .primary:hover {
-    background: #3d8a60;
-    border-color: #3d8a60;
+    background: var(--green-2);
+    border-color: var(--green-2);
     transform: translateY(-1px);
   }
 
@@ -1443,7 +1477,7 @@ button:focus-visible,
   .presence:hover,
   .create:hover,
   .radius-wrap:hover {
-    border-color: #c9dccb;
+    border-color: #c9dba8;
     box-shadow: var(--shadow-hover);
   }
 

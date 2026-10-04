@@ -108,6 +108,20 @@ def init_db() -> None:
                 parent_id TEXT PRIMARY KEY,
                 unread INTEGER NOT NULL DEFAULT 1
             );
+            CREATE TABLE IF NOT EXISTS place_recs (
+                place_id TEXT PRIMARY KEY,
+                recommended INTEGER NOT NULL DEFAULT 0
+            );
+            CREATE TABLE IF NOT EXISTS places (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                kind TEXT NOT NULL,
+                tag TEXT NOT NULL,
+                note TEXT NOT NULL,
+                lat REAL NOT NULL,
+                lng REAL NOT NULL,
+                who TEXT NOT NULL
+            );
             """
         )
         cols = {row[1] for row in conn.execute("PRAGMA table_info(trust)")}
@@ -193,6 +207,15 @@ class SwapIn(BaseModel):
     lng: float
 
 
+class PlaceIn(BaseModel):
+    name: str
+    kind: str = "miejsce"
+    tag: str = ""
+    note: str = ""
+    lat: float
+    lng: float
+
+
 def pin_from_seed(seed: dict, seed_id: str | None = None) -> tuple[dict, str, str]:
     district_id, area_id = seed_area(seed_id or seed.get("id") or "", seed)
     center = area_of(area_id, district_id)
@@ -244,19 +267,66 @@ def nearby_swaps(origin: dict) -> list[dict]:
     return sorted(items, key=lambda s: s.get("distance_km") or 0)
 
 
-def nearby_places(origin: dict) -> list[dict]:
-    out = []
-    for seed in PLACE_SEEDS:
+def place_rec_map() -> dict[str, bool]:
+    with db() as conn:
+        rows = conn.execute("SELECT place_id, recommended FROM place_recs").fetchall()
+    return {row["place_id"]: bool(row["recommended"]) for row in rows}
+
+
+def place_is_recommended(place_id: str, source: str, recs: dict[str, bool]) -> bool:
+    if place_id in recs:
+        return recs[place_id]
+    return source == "user"
+
+
+def serialize_place(seed: dict, origin: dict, recs: dict[str, bool], loc: dict | None = None) -> dict:
+    if loc is None:
         loc, _item_district, _item_area = pin_from_seed(seed)
+    source = seed.get("source") or "admin"
+    kind = seed.get("kind") or "miejsce"
+    if kind not in PLACE_KIND_LABEL:
+        kind = "miejsce"
+    recommended = place_is_recommended(seed["id"], source, recs)
+    return {
+        **{k: v for k, v in seed.items() if k not in {"east", "north", "lat", "lng", "verified"}},
+        **distance_fields(origin, loc),
+        "kind": kind,
+        "kind_label": PLACE_KIND_LABEL[kind],
+        "source": source,
+        "photo": seed.get("photo") or "/static/img/photos/place-kawa.jpg",
+        "verified": recommended,
+        "recommended": recommended,
+    }
+
+
+def nearby_places(origin: dict) -> list[dict]:
+    recs = place_rec_map()
+    out = [serialize_place(seed, origin, recs) for seed in PLACE_SEEDS]
+    with db() as conn:
+        rows = conn.execute("SELECT * FROM places").fetchall()
+    seen = {item["id"] for item in out}
+    for row in rows:
+        if row["id"] in seen:
+            continue
+        loc = {"lat": row["lat"], "lng": row["lng"]}
         out.append(
-            {
-                **{k: v for k, v in seed.items() if k not in {"east", "north", "lat", "lng"}},
-                **distance_fields(origin, loc),
-                "kind_label": PLACE_KIND_LABEL[seed["kind"]],
-                "photo": seed.get("photo") or "/static/img/photos/place-kawa.jpg",
-            }
+            serialize_place(
+                {
+                    "id": row["id"],
+                    "name": row["name"],
+                    "kind": row["kind"],
+                    "source": "user",
+                    "tag": row["tag"] or PLACE_KIND_LABEL.get(row["kind"], "Miejsce").lower(),
+                    "note": row["note"],
+                    "by": row["who"],
+                    "photo": "/static/img/photos/place-kawa.jpg",
+                },
+                origin,
+                recs,
+                loc,
+            )
         )
-    return sorted(out, key=lambda p: (not p["verified"], p.get("distance_km") or 0, p["name"]))
+    return sorted(out, key=lambda p: (not p["recommended"], p.get("distance_km") or 0, p["name"]))
 
 
 def nearby_parents(
@@ -286,7 +356,7 @@ def nearby_parents(
         if wanted and not wanted.intersection(seeking):
             continue
         overlap = [sid for sid in seeking if sid in match_against]
-        item = {k: v for k, v in seed.items() if k not in {"east", "north", "gender", "age_band", "district_id", "area_id"}}
+        item = {k: v for k, v in seed.items() if k not in {"east", "north", "gender", "age_band", "district_id", "area_id", "window"}}
         item.update(
             {
                 **distance_fields(center, loc),
@@ -294,7 +364,6 @@ def nearby_parents(
                 "kid_label": public_kid(seed["gender"], seed["age_band"]),
                 "age_band": seed["age_band"],
                 "gender": seed["gender"],
-                "window": seed.get("window") or "",
                 "seeking": seeking,
                 "overlap": overlap,
                 "overlap_labels": [SEEKING_LABEL.get(sid, sid) for sid in overlap],
@@ -456,6 +525,38 @@ def create_swap(payload: SwapIn) -> dict:
     return {"id": swap_id}
 
 
+@app.post("/api/places")
+def create_place(payload: PlaceIn) -> dict:
+    place_id = f"place-{int(time.time() * 1000)}"
+    kind = payload.kind if payload.kind in PLACE_KIND_LABEL else "miejsce"
+    who = (read_profile().get("name") or "Sylwia").strip() or "Sylwia"
+    with db() as conn:
+        conn.execute(
+            """
+            INSERT INTO places (id, name, kind, tag, note, lat, lng, who)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                place_id,
+                payload.name.strip(),
+                kind,
+                payload.tag.strip() or PLACE_KIND_LABEL[kind].lower(),
+                payload.note.strip() or "Dodane przez wioskę.",
+                payload.lat,
+                payload.lng,
+                who,
+            ),
+        )
+        conn.execute(
+            """
+            INSERT INTO place_recs (place_id, recommended) VALUES (?, 1)
+            ON CONFLICT(place_id) DO UPDATE SET recommended = 1
+            """,
+            (place_id,),
+        )
+    return {"id": place_id, "recommended": True}
+
+
 @app.post("/api/join")
 def join(payload: JoinIn) -> dict:
     with db() as conn:
@@ -552,6 +653,11 @@ class TrustIn(BaseModel):
     met: bool | None = None
     reported: bool | None = None
     starred: bool | None = None
+
+
+class PlaceRecIn(BaseModel):
+    place_id: str
+    recommended: bool
 
 
 def inbox_payload() -> dict:
@@ -692,3 +798,16 @@ def save_trust(payload: TrustIn) -> dict:
         "reported": bool(reported),
         "starred": bool(starred),
     }
+
+
+@app.post("/api/places/recommend")
+def save_place_rec(payload: PlaceRecIn) -> dict:
+    with db() as conn:
+        conn.execute(
+            """
+            INSERT INTO place_recs (place_id, recommended) VALUES (?, ?)
+            ON CONFLICT(place_id) DO UPDATE SET recommended = excluded.recommended
+            """,
+            (payload.place_id, int(payload.recommended)),
+        )
+    return {"place_id": payload.place_id, "recommended": payload.recommended}

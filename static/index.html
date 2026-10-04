@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#1F7A4C" />
+    <meta name="theme-color" content="#386641" />
     <title>mamy wioskę</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,15 +11,15 @@
       href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="icon" href="/static/img/app-icon.jpg" type="image/jpeg" />
-    <link rel="apple-touch-icon" href="/static/img/app-icon.jpg" />
-    <link rel="stylesheet" href="/static/style.css?v=57" />
+    <link rel="icon" href="/static/img/logo-tipi.png?v=77" type="image/png" />
+    <link rel="apple-touch-icon" href="/static/img/logo-tipi.png?v=77" />
+    <link rel="stylesheet" href="/static/style.css?v=77" />
   </head>
   <body data-tab="poznaj">
     <div class="phone">
       <section class="gate" id="gate" hidden>
         <div class="gate-top">
-          <img class="gate-logo" src="/static/img/app-icon.jpg" alt="" width="56" height="56" />
+          <img class="gate-logo" src="/static/img/logo-tipi.png?v=77" alt="" width="56" height="56" />
           <p class="gate-count" id="gate-count">1 / 6</p>
         </div>
         <div class="gate-dots" id="gate-dots" aria-hidden="true"></div>
@@ -72,10 +72,9 @@
       <header class="appbar">
         <div class="brand">
           <span class="logo" aria-hidden="true">
-            <img src="/static/img/app-icon.jpg" alt="" width="44" height="44" />
+            <img src="/static/img/logo-tipi.png?v=77" alt="" width="44" height="44" />
           </span>
           <div>
-            <p class="hello" id="hello">Cześć</p>
             <h1>mamy wioskę</h1>
           </div>
         </div>
@@ -100,13 +99,13 @@
       <main class="feed">
         <section id="panel-poznaj">
           <header class="screen-head">
-            <h2 class="screen-title">Poznaj wioskę</h2>
+            <h2 class="screen-title screen-title-long" id="poznaj-title">Twoi ludzie są bliżej niż myślisz</h2>
           </header>
           <div class="radius-wrap">
             <div class="area-map-wrap">
               <div class="area-map" id="area-map">
-                <img src="/static/img/area-map.svg?v=57" alt="" />
-                <div class="area-ring" id="area-ring" style="--ring-t: 0">
+                <img src="/static/img/area-map.svg?v=77" alt="" />
+                <div class="area-ring" id="area-ring" style="--ring-t: 0.25">
                   <p class="area-count" aria-live="polite">
                     <strong id="area-count-num">0</strong>
                     <span id="area-count-label">mam</span>
@@ -117,7 +116,7 @@
             <div class="radius-tools">
               <button type="button" class="radius-step" id="radius-minus" aria-label="Zmniejsz obszar">−</button>
               <div class="radius-slider">
-                <input class="distance-range" id="radius-range" type="range" min="0" max="4" step="1" value="0" />
+                <input class="distance-range" id="radius-range" type="range" min="0" max="4" step="1" value="1" />
                 <div class="distance-ticks" id="distance-ticks" aria-hidden="true">
                   <span>500 m</span>
                   <span>1 km</span>
@@ -130,15 +129,14 @@
             </div>
           </div>
           <div class="need-block">
-            <p class="create-title">Marzenia i potrzeby</p>
+            <p class="create-title">Chciałabym</p>
             <div class="checks" id="need-filters"></div>
           </div>
           <div class="need-block">
             <p class="create-title">Wiek dzieci</p>
             <div class="filters" id="age-filters"></div>
-            <div class="filters" id="star-filters"></div>
           </div>
-          <h3 class="block-title">Kto jest w okolicy</h3>
+          <h2 class="list-heading">Poznaj wioskę</h2>
           <p class="empty" id="empty-parents" hidden>
             <img src="/static/img/empty.svg" alt="" width="220" height="120" />
             <span id="empty-parents-text">Nikogo w tym promieniu. Powiększ obszar.</span>
@@ -153,6 +151,18 @@
           <div class="filters" id="place-filters"></div>
           <p class="empty" id="empty-places" hidden>Brak miejsc w tym promieniu.</p>
           <ul class="cards" id="list-places"></ul>
+          <form class="create" id="create-place">
+            <p class="create-title">Znasz miejsce? Dodaj do wioski</p>
+            <input name="name" required placeholder="Nazwa kawiarni, gabinetu, opiekunki…" />
+            <select name="kind">
+              <option value="miejsce">Miejsce</option>
+              <option value="usluga">Usługa</option>
+              <option value="opiekunka">Opieka</option>
+            </select>
+            <input name="tag" placeholder="np. kawiarnia, pediatra" />
+            <input name="note" placeholder="Dlaczego warto" />
+            <button type="submit" class="primary">Dodaj</button>
+          </form>
         </section>
 
         <section id="panel-dzieje" hidden>
@@ -285,6 +295,6 @@
     <div class="scrim" id="scrim" hidden></div>
     <aside class="drawer" id="sheet" hidden></aside>
 
-    <script src="/static/app.js?v=57"></script>
+    <script src="/static/app.js?v=77"></script>
   </body>
 </html>

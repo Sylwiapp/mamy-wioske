@@ -4,7 +4,7 @@ const MY_WANT_LABEL = {
   pogadac: "Pogadać",
   dom: "W domu",
 };
-const AVATAR = ["#1f7a4c", "#2e9b63", "#4a8f6a", "#c47b4a", "#3d7a8a", "#6a8f4e"];
+const AVATAR = ["#386641", "#6a994e", "#a7c957", "#bc4749", "#5d8a6a", "#8fb36a"];
 const ART = {
   park: "/static/img/park.svg",
   dk: "/static/img/dk.svg",
@@ -41,7 +41,6 @@ const state = {
   filter: "wszyscy",
   similarAge: false,
   needFilters: [],
-  starredOnly: false,
   horizon: "wszystkie",
   tab: "poznaj",
   parents: [],
@@ -51,7 +50,7 @@ const state = {
   swaps: [],
   swapFilter: "wszystkie",
   places: [],
-  placeFilter: "wszystkie",
+  placeFilters: [],
   profile: null,
   trust: {},
   gateStep: 0,
@@ -64,12 +63,12 @@ const state = {
   threads: [],
   inboxOpen: false,
   email: "",
-  radiusM: 500,
+  radiusM: 1000,
 };
 
 const RADIUS_STEPS = [500, 1000, 3000, 5000, 10000];
-const TIPI_SVG =
-  '<svg class="tipi" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 11.6 L12 4.2 L19.8 11.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.4 10.8 V19.6 H17.6 V10.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10.2 19.6 V14.6 H13.8 V19.6" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/><path d="M3.6 19.6 H20.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+const HEART_SVG =
+  '<svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19.2C8.2 16.2 4.4 13 4.4 9.5 4.4 7.1 6.3 5.4 8.6 5.4c1.4 0 2.6.7 3.4 1.8.8-1.1 2-1.8 3.4-1.8 2.3 0 4.2 1.7 4.2 4.1 0 3.5-3.8 6.7-7.6 9.7Z"/></svg>';
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, (ch) =>
@@ -106,7 +105,6 @@ function fillRadiusControl() {
   const range = document.getElementById("radius-range");
   const minus = document.getElementById("radius-minus");
   const plus = document.getElementById("radius-plus");
-  const ring = document.getElementById("area-ring");
   const i = radiusIndex();
   if (range) {
     range.value = String(i);
@@ -114,6 +112,7 @@ function fillRadiusControl() {
   }
   if (minus) minus.disabled = i <= 0;
   if (plus) plus.disabled = i >= RADIUS_STEPS.length - 1;
+  const ring = document.getElementById("area-ring");
   if (ring) ring.style.setProperty("--ring-t", String(i / Math.max(1, RADIUS_STEPS.length - 1)));
   document.querySelectorAll("#distance-ticks span").forEach((el, idx) => {
     el.classList.toggle("on", idx === i);
@@ -128,15 +127,10 @@ function mamWord(n) {
   return "mam";
 }
 
-function nearbyMomCount() {
-  return state.parents.filter((p) => !state.trust[p.id]?.reported).length;
-}
-
-function fillAreaCount() {
+function fillAreaCount(n) {
   const num = document.getElementById("area-count-num");
   const label = document.getElementById("area-count-label");
   if (!num) return;
-  const n = nearbyMomCount();
   num.textContent = String(n);
   if (label) label.textContent = mamWord(n);
 }
@@ -221,6 +215,27 @@ function chips(host, items, current, onPick, cls = "chip") {
     btn.addEventListener("click", () => onPick(id));
     host.appendChild(btn);
   });
+}
+
+function chipsMulti(host, items, selected, onPick, cls = "chip") {
+  if (!host) return;
+  const on = new Set(selected || []);
+  host.innerHTML = "";
+  items.forEach(([id, label]) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = on.has(id) ? `${cls} on` : cls;
+    btn.textContent = label;
+    btn.addEventListener("click", () => onPick(id));
+    host.appendChild(btn);
+  });
+}
+
+function toggleFilter(list, id) {
+  const next = new Set(list || []);
+  if (next.has(id)) next.delete(id);
+  else next.add(id);
+  return [...next];
 }
 
 function renderDistrictCards(hostId, selectedId, onPick) {
@@ -333,7 +348,6 @@ function visibleHappenings() {
 function visibleParents() {
   return state.parents.filter((p) => {
     if (state.trust[p.id]?.reported) return false;
-    if (state.starredOnly && !state.trust[p.id]?.starred) return false;
     return true;
   });
 }
@@ -345,11 +359,18 @@ function visibleSwaps() {
   });
 }
 
+function placeIsRecommended(p) {
+  return Boolean(p?.recommended ?? p?.verified);
+}
+
 function visiblePlaces() {
+  const selected = state.placeFilters || [];
+  const kinds = selected.filter((id) => id !== "sprawdzone");
+  const wantRecommended = selected.includes("sprawdzone");
   return state.places.filter((p) => {
-    if (state.placeFilter === "wszystkie") return true;
-    if (state.placeFilter === "sprawdzone") return p.verified;
-    return p.kind === state.placeFilter;
+    if (kinds.length && !kinds.includes(p.kind)) return false;
+    if (wantRecommended && !placeIsRecommended(p)) return false;
+    return true;
   });
 }
 
@@ -371,7 +392,6 @@ function renderChrome() {
     },
     "mini"
   );
-  fillStarFilters();
   chips(
     document.getElementById("horizon-filters"),
     [
@@ -433,18 +453,17 @@ function renderChrome() {
     },
     "mini"
   );
-  chips(
+  chipsMulti(
     document.getElementById("place-filters"),
     [
-      ["wszystkie", "Wszystko"],
-      ["sprawdzone", "Sprawdzone"],
       ["miejsce", "Miejsca"],
       ["usluga", "Usługi"],
-      ["opiekunka", "Opiekunki"],
+      ["opiekunka", "Opieka"],
+      ["sprawdzone", "Sprawdzone"],
     ],
-    state.placeFilter,
+    state.placeFilters,
     (id) => {
-      state.placeFilter = id;
+      state.placeFilters = toggleFilter(state.placeFilters, id);
       renderChrome();
       renderLists();
     },
@@ -463,7 +482,7 @@ function renderLists() {
   const places = visiblePlaces();
   const peopleRows = visibleParents();
   document.getElementById("count-parents").textContent = peopleRows.length;
-  fillAreaCount();
+  fillAreaCount(peopleRows.length);
   document.getElementById("count-happenings").textContent = happenings.length;
   document.getElementById("count-swaps").textContent = swaps.length;
   document.getElementById("count-places").textContent = places.length;
@@ -474,9 +493,8 @@ function renderLists() {
   document.getElementById("panel-inbox").hidden = state.tab !== "inbox";
   document.getElementById("panel-profil").hidden = state.tab !== "profil";
   document.getElementById("empty-parents").hidden = peopleRows.length > 0;
-  document.getElementById("empty-parents-text").textContent = state.starredOnly
-    ? "Nikogo jeszcze nie oznaczyłaś w wiosce. Dotknij tipi przy osobie."
-    : radiusIndex() >= RADIUS_STEPS.length - 1 && !(state.needFilters || []).length
+  document.getElementById("empty-parents-text").textContent =
+    radiusIndex() >= RADIUS_STEPS.length - 1 && !(state.needFilters || []).length
       ? "Nikogo w tym promieniu."
       : "Nikogo w tym promieniu. Zmień filtry albo powiększ obszar.";
   document.getElementById("empty-happenings").hidden = happenings.length > 0;
@@ -493,7 +511,7 @@ function renderLists() {
         <button class="card" data-person="${esc(p.id)}" type="button">
           <div class="avatar-wrap">
             <div class="avatar" style="background:${colorFor(p.id)}">${esc(p.name[0])}</div>
-            ${starred ? `<span class="village-badge">${TIPI_SVG}</span>` : ""}
+            ${starred ? `<span class="village-badge">${HEART_SVG}</span>` : ""}
           </div>
           <div>
             <strong>${esc(p.name)}</strong>
@@ -502,7 +520,7 @@ function renderLists() {
             ${overlap ? `<span class="match">${p.match_score > 0 ? "Podobnie: " : ""}${esc(overlap)}</span>` : ""}
           </div>
         </button>
-        <button class="village-mark${starred ? " on" : ""}" type="button" data-star="${esc(p.id)}" aria-pressed="${starred}" aria-label="${starred ? "Usuń z wioski" : "Dodaj do wioski"}">${TIPI_SVG}</button>
+        <button class="village-mark${starred ? " on" : ""}" type="button" data-star="${esc(p.id)}" aria-pressed="${starred}" aria-label="${starred ? "Usuń serduszko" : "Dodaj serduszko"}">${HEART_SVG}</button>
       </li>`;
     })
     .join("");
@@ -572,7 +590,7 @@ function renderLists() {
           <div>
             <strong>${esc(p.name)}</strong>
             <span>${esc(p.tag)} · ${esc(p.by)}</span>
-            <span class="meta">${esc(p.distance)}${p.verified ? " · sprawdzone" : ""}</span>
+            <span class="meta">${esc(p.distance)}${placeIsRecommended(p) ? " · polecamy" : ""}</span>
           </div>
           <span class="go" aria-hidden="true">→</span>
         </button>
@@ -727,9 +745,8 @@ function openPerson(id) {
     <p>${esc(p.bio)}</p>
     <p class="meta">${esc(p.distance)} · ${esc(p.want_label)}</p>
     ${(p.overlap_labels || []).length ? `<p class="match">Szuka podobnie: ${esc((p.overlap_labels || []).join(", "))}</p>` : ""}
-    ${p.window ? `<p class="hint">Okno: ${esc(p.window)}</p>` : ""}
     <div class="sheet-actions">
-      <button class="village-sheet${trust.starred ? " on" : ""}" id="star-village" type="button">${TIPI_SVG} ${trust.starred ? "W Twojej wiosce" : "Dodaj do wioski"}</button>
+      <button class="village-sheet${trust.starred ? " on" : ""}" id="star-village" type="button">${HEART_SVG} ${trust.starred ? "Znam" : "Serduszko"}</button>
       <button class="primary" id="write" type="button">Napisz wiadomość</button>
       <button class="ghost mini" id="report" type="button">${trust.reported ? "Cofnij zgłoszenie" : "Zgłoś profil"}</button>
     </div>
@@ -737,22 +754,6 @@ function openPerson(id) {
   document.getElementById("star-village").addEventListener("click", () => toggleTrust(p.id, { starred: !trust.starred }));
   document.getElementById("write").addEventListener("click", () => openChat(p, false));
   document.getElementById("report").addEventListener("click", () => toggleTrust(p.id, { reported: !trust.reported }));
-}
-
-function fillStarFilters() {
-  const host = document.getElementById("star-filters");
-  if (!host) return;
-  host.innerHTML = "";
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = state.starredOnly ? "mini on village-chip" : "mini village-chip";
-  btn.innerHTML = `${TIPI_SVG} Oznaczone`;
-  btn.addEventListener("click", () => {
-    state.starredOnly = !state.starredOnly;
-    renderChrome();
-    renderLists();
-  });
-  host.appendChild(btn);
 }
 
 async function toggleTrust(parentId, patch, opts = {}) {
@@ -824,15 +825,36 @@ function openPlace(id) {
   state.tab = "miejsca";
   renderChrome();
   renderLists();
+  const recommended = placeIsRecommended(p);
   showSheet(`
     <button class="close" type="button">Zamknij</button>
     <img class="cover" src="${esc(photoFor(p, p.kind === "opiekunka" ? "people" : "dk"))}" alt="" />
-    <p class="eyebrow">${esc(p.kind_label)}${p.verified ? " · sprawdzone" : ""}</p>
+    <p class="eyebrow">${esc(p.kind_label)}${recommended ? " · polecamy" : ""}</p>
     <h2>${esc(p.name)}</h2>
     <p class="kid">${esc(p.tag)} · ${esc(p.distance)}</p>
     <p>${esc(p.note)}</p>
     <p class="hint">Poleca: ${esc(p.by)}</p>
+    <div class="sheet-actions">
+      <button class="village-sheet${recommended ? " on" : ""}" id="place-recommend" type="button">${recommended ? "Polecamy" : "Polecamy to miejsce"}</button>
+    </div>
   `);
+  document.getElementById("place-recommend").addEventListener("click", () => togglePlaceRec(p.id, !recommended));
+}
+
+async function togglePlaceRec(placeId, recommended) {
+  const saved = await fetch("/api/places/recommend", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ place_id: placeId, recommended }),
+  }).then((r) => r.json());
+  const place = state.places.find((x) => x.id === placeId);
+  if (place) {
+    place.recommended = saved.recommended;
+    place.verified = saved.recommended;
+  }
+  renderChrome();
+  renderLists();
+  openPlace(placeId);
 }
 
 async function openChat(person, fromInbox = false) {
@@ -1086,8 +1108,12 @@ function collectProfile(extra = {}) {
 }
 
 function fillHello() {
-  const name = state.profile?.name;
-  document.getElementById("hello").textContent = name ? `Cześć, ${name}` : "Cześć";
+  const title = document.getElementById("poznaj-title");
+  if (!title) return;
+  const name = (state.profile?.name || "").trim();
+  title.textContent = name
+    ? `${name}, Twoi ludzie są bliżej niż myślisz`
+    : "Twoi ludzie są bliżej niż myślisz";
 }
 
 function renderGate() {
@@ -1338,6 +1364,27 @@ document.getElementById("create-swap").addEventListener("submit", async (ev) => 
   });
   ev.target.reset();
   state.tab = "wymiana";
+  renderChrome();
+  await loadVillage();
+});
+
+document.getElementById("create-place").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const form = new FormData(ev.target);
+  await fetch("/api/places", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: form.get("name"),
+      kind: form.get("kind"),
+      tag: form.get("tag"),
+      note: form.get("note"),
+      lat: state.origin.lat,
+      lng: state.origin.lng,
+    }),
+  });
+  ev.target.reset();
+  state.tab = "miejsca";
   renderChrome();
   await loadVillage();
 });
