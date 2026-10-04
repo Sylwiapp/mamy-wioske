@@ -873,7 +873,7 @@ async function openChat(person, fromInbox = false) {
     <button class="close" type="button">${fromInbox ? "Wiadomości" : "Zamknij"}</button>
     <div class="avatar" style="background:${colorFor(person.id)};width:48px;height:48px;margin-bottom:8px">${esc(person.name[0])}</div>
     <h2>${esc(person.name)}</h2>
-    <p class="kid">Wiadomość zostaje między wami. Imion dzieci tu nie wpisujemy.</p>
+    <p class="kid">To wasz prywatny chat. Napisz, kiedy wychodzisz albo gdzie się spotkacie.</p>
     <div class="log">${log}</div>
     <div class="composer">
       <input id="draft" placeholder="Krótka wiadomość…" />
